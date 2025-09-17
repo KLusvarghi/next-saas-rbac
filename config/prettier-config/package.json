@@ -4,6 +4,9 @@
   "main": "index.mjs",
   "private": true,
   "license": "MIT",
+  "scripts": {
+    "lint": "echo 'No linting needed for prettier config'"
+  },
   "devDependencies": {
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14"

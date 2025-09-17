@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
+  "scripts": {
+    "lint": "echo 'No linting needed for tsconfig'"
+  },
   "files": [
     "base.json"
   ]
