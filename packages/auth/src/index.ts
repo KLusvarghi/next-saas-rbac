@@ -6,7 +6,7 @@ import {
 } from "@casl/ability";
 import z from "zod";
 
-import type { User } from "./models/user";
+import type { User } from "./models";
 import { permissions } from "./permissions";
 import {
   billingSubject,
@@ -81,7 +81,14 @@ export function defineAbilityFor(user: User) {
 
   permissions[user.role](user, builder);
 
-  const ability = builder.build();
+  // dentro do "build" ele tem o objeto de configurações, que é onde irei dizer o type do subject
+  const ability = builder.build({
+    // e nesse caso como o nosso "builder" pode ser qualquer subject, vamos usar a função "detectSubjectType" para detectar o type do subject, que recebe o subject como params
+    // e como nos implemenamos o "__typename" no nosso subject, vamos retornar o "__typename" do subject que irá dizer a qual subject ele pertence
+    detectSubjectType(subject) {
+      return subject.__typename; // dizemos ao CASL que o type do subject é o "__typename" do subject
+    },
+  });
 
   return ability;
 }
