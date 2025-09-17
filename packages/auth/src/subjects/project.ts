@@ -3,6 +3,8 @@
 
 import z from "zod";
 
+import { projectSchema } from "../models";
+
 // e usando "array" nós podemos adicionar mais posições, o que não é o caso de uma tupla
 export const projectSubject = z.tuple([
   // como a primeira posição são actions, e nelas utilizamos "ou" (|), nós podemos usar o "z.union" para unir as actions
@@ -14,7 +16,11 @@ export const projectSubject = z.tuple([
     z.literal("update"),
     z.literal("delete"),
   ]),
-  z.literal("Project"),
+  // z.literal("Project"),
+
+  // ao invés de tipar apenas como "Project" (como está acima), vamos tipar com "projectSchema" tambem
+  // ao fazer isso, dentro de permissions fica mais fácil de entender as propriedades do "Project" que é o "projectSchema", facilitando na hora de fazer condicionamento com os campos de "project" lá em "permissions"
+  z.union([z.literal("Project"), projectSchema]),
 ]);
 
 // é um array de 2 posições, a primeira posição é uma action e a segunda posição é um subject
