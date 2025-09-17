@@ -9,6 +9,7 @@ export const userSubject = z.tuple([
   z.union([
     z.literal("manager"),
     z.literal("get"),
+    z.literal("create"),
     z.literal("update"),
     z.literal("delete"),
   ]),
