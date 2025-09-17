@@ -1,5 +1,4 @@
 {
-  // "extends": "@saas/tsconfig/base.json",
-  "extends": "../../config/typescript-config/base.json",
+  "extends": "@saas/tsconfig/base.json",
   "include": ["src/**/*"]
 }
