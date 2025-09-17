@@ -3,15 +3,12 @@
  */
 module.exports = {
   extends: ["@rocketseat/eslint-config/next"],
-  plugins: {
-    "simple-import-sort": simpleImportSort,
-  },
+  plugins: ["simple-import-sort"],
   rules: {
     // deixando como "error" ao rodar o lint ele irá identificar e corrigir os imports automaticamnete, diferente do "warn" que apenas avisa
     "simple-import-sort/imports": "error",
-  }
+  },
 };
-
 
 // import { config as baseConfig } from "./base.js";
 

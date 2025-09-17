@@ -1,15 +1,11 @@
-/**
- * @type {import("eslint").Linter.Config[]}
- */
+/** @type {import("eslint").Linter.Config[]} */
 module.exports = {
   extends: ["@rocketseat/eslint-config/react"],
-  plugins: {
-    "simple-import-sort": simpleImportSort,
-  },
+  plugins: ["simple-import-sort"],
   rules: {
     // deixando como "error" ao rodar o lint ele irá identificar e corrigir os imports automaticamnete, diferente do "warn" que apenas avisa
     "simple-import-sort/imports": "error",
-  }
+  },
 };
 
 // import js from "@eslint/js";
