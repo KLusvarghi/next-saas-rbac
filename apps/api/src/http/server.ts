@@ -1,6 +1,9 @@
 import fastifyCors from "@fastify/cors";
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUi from "@fastify/swagger-ui";
 import fastify from "fastify";
 import {
+  jsonSchemaTransform,
   serializerCompiler,
   validatorCompiler,
   ZodTypeProvider,
@@ -20,6 +23,24 @@ app.setSerializerCompiler(serializerCompiler);
 
 // dizemos como o fastify vai validar os dados da requisição
 app.setValidatorCompiler(validatorCompiler);
+
+// A gente registra o swagger
+app.register(fastifySwagger, {
+  openapi: {
+    info: {
+      title: "Next.js Saas",
+      description: "Fullstack SaaS app with multi-tenant and RBAC",
+      version: "1.0.0",
+    },
+    servers: [],
+  },
+  transform: jsonSchemaTransform,
+});
+
+// a gente registra o swagger ui para poder visualizar na web
+app.register(fastifySwaggerUi, {
+  routePrefix: "/docs",
+});
 
 // vai permitir que qualquer aplicação possa acessar a nossa API
 app.register(fastifyCors);
