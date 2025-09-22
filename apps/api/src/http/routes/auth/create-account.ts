@@ -6,6 +6,8 @@ import { z } from "zod/v4";
 
 import { prisma } from "@/lib/prisma";
 
+import { BadRequestError } from "../_errors";
+
 export async function createAccount(app: FastifyInstance) {
   // sempre que vamos criar uma rota "app" temos que usar o withTypeProvider<ZodTypeProvider>() para que o fastify use o tipo provider do Zod
   app.withTypeProvider<ZodTypeProvider>().post(
@@ -18,9 +20,6 @@ export async function createAccount(app: FastifyInstance) {
         tags: ["auth"],
         response: {
           201: z.object({
-            message: z.string(),
-          }),
-          400: z.object({
             message: z.string(),
           }),
         },
@@ -41,9 +40,7 @@ export async function createAccount(app: FastifyInstance) {
       });
 
       if (userWithSameEmail) {
-        return reply.status(400).send({
-          message: "User with same email already exists",
-        });
+        throw new BadRequestError("User with same email already exists");
       }
 
       // pegando apenas o dominio do email
