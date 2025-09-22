@@ -1,0 +1,175 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String? // como o github o nome é opcional, não temos como obrigar ter uma nome, amenos que obrigamos a ele informar
+  email        String   @unique
+  // o prima vai entender o nome como "passwordHash" mas eu renomeio para que ele insira no banco de dados como "password_hash"
+  passwordHash String?  @map("password_hash")
+  avatarUrl    String?  @map("avatar_url")
+  createdAt    DateTime @default(now()) @map("created_at")
+  // usamos o tipo "updatedAt" que ele atribui essa valor automaticamente assim que a entidade é atualizada
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // RELACIONAMENTOS INVERSOS
+  tokens             Token[] // dizemos que um user poderá ter vários tokens (por isso do array)
+  accounts           Account[] // dizemos que um user poderá ter vários accounts (por isso do array)
+  invites            Invite[] // dizemos que um user poderá ter vários invites (por isso do array)
+  member_on          Member[] // dizemos que um user poderá ter vários members (por isso do array)
+  owns_organizations Organization[] // dizemos que um user poderá ter várias organizações (por isso do array)
+  owns_projects      Project[] // dizemos que um user poderá ter vários projects (por isso do array)
+
+  // aqui estamos mapeando o nome da tabela no banco de dados, Se não fizemos isso ele irá criar o nome da tabela com o que é definido no model, no caso "User"
+  @@map("users")
+}
+
+enum TokenType {
+  PASSWORD_RECOVERY
+  EMAIL_VERIFICATION
+}
+
+// para que a gente possa validar o reset de senha, precisamos de um token
+// e para que a gente possa usar esses token para mais cases, dizemos que ele terá um type
+model Token {
+  id   String    @id @default(uuid())
+  type TokenType
+
+  // definimos o relacionamento com a tabela User, dizendo que o campo userId é uma chave estrangeira para a tabela User e qual campo é a chave primária que está na tabela User
+  user   User   @relation(fields: [userId], references: [id]) // dizemos que o token está relacionado ao user
+  userId String @map("user_id")
+
+  // account Account @relation(fields: [accountId], references: [id])
+  accountId String @map("account_id")
+
+  expiresAt DateTime
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("tokens")
+}
+
+enum AccountProvider {
+  GITHUB
+}
+
+// Essa tabela irá servir para quando o user logar com seu github ou outro provedor, e cada provedor terá um account, mas, portanto que seja o mesmo email, ele terá as mesma informações
+model Account {
+  id       String          @id @default(uuid())
+  provider AccountProvider
+
+  // esse campo server para que a gente tenha um valor único que é provido pelo provedor (github), assim facilita após que o user conectou uma vez com o provedor, a gente valide se ele não mudou de conta
+  providerAccountId String @unique @map("provider_account_id")
+
+  user   User   @relation(fields: [userId], references: [id]) // dizemos que o account está relacionado ao user
+  userId String @map("user_id")
+
+  // AQUI, criamos um indice para que cada usuário só poderá estar conectado uma vez com o mesmo provedor, então ele não pode conectar com dois githubs diferentes
+  @@unique([provider, userId])
+  @@map("accounts")
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+  BILLING
+}
+
+model Invite {
+  id    String @id @default(uuid())
+  email String
+  role  Role
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // deixamos opcional caso o usuário que enviou o convite exclua sua conta, o convite ainda será válido para o usuário que recebeu o convite
+  author User?   @relation(fields: [userId], references: [id]) // dizemos que o author está relacionado ao user
+  userId String? @map("user_id")
+
+  // temos que expecificar a qual organização o invite pertence
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String       @map("organization_id")
+
+  expiresAt DateTime
+
+  // aqui estamos criando um indice para que cada organização só possa ter um convite com o mesmo email
+  @@unique([email, organizationId])
+  // esse indice irá servir para facilitar quando o user for buscar os convites pendentes que estão vinculado ao email dele
+  // e se a gente não fizer isso, ele terá que varrer linha por linha para encontrar o email
+  @@index([email])
+  @@map("invites")
+}
+
+// essa é uma tabela pivo N:N entre User e Organization
+model Member {
+  id   String @id @default(uuid())
+  role Role
+
+  // Essa é a relação de um membro para uma organização
+  // isso porque um user pode fazer parte de várias organizações
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String       @map("organization_id")
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @map("user_id")
+
+  // aqui dizemos que um user só pode fazer parte de uma organização uma vez (par aque um user não esteja 2 vezes na mesma organização)
+  @@unique([organizationId, userId])
+  @@map("members")
+}
+
+model Organization {
+  id     String  @id @default(uuid())
+  name   String
+  slug   String  @unique
+  // o dominio será para que quando o user logar e o email dele tiver "rocketses.com", já será feito a associação com a organização
+  domain String? @unique
+
+  // essa é uma feature flag para que o dono da organizarion decida se quando o user seja logado (com o dominio), ele será vinculado à organização ou não
+  shouldAttachUserByDomain Boolean @default(false)
+
+  avatarUrl String? @map("avatar_url")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // quem são os priprietários da organização (como se fossem administradores)
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String @map("owner_id")
+
+  invites  Invite[] // dizemos que uma organização poderá ter vários invites (por isso do array)
+  members  Member[] // dizemos que uma organização poderá ter vários members (por isso do array)
+  projects Project[] // dizemos que uma organização poderá ter vários projects (por isso do array)
+
+  @@map("organizations")
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  slug        String   @unique
+  avatarUrl   String?  @map("avatar_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String       @map("organization_id")
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String @map("owner_id")
+
+  @@map("projects")
+}
