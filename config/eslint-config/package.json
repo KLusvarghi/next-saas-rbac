@@ -6,9 +6,9 @@
     "lint": "echo 'ESLint config package - no linting needed'"
   },
   "exports": {
-    "./base": "./base.js",
-    "./next": "./next.js",
-    "./node": "./node.js"
+    "./base.js": "./base.js",
+    "./next.js": "./next.js",
+    "./node.js": "./node.js"
   },
   "devDependencies": {
     "@saas/prettier": "workspace:*",
