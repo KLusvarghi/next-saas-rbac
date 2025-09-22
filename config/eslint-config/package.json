@@ -11,12 +11,14 @@
     "./node.js": "./node.js"
   },
   "devDependencies": {
-    "@saas/prettier": "workspace:*",
     "@rocketseat/eslint-config": "^2.2.2",
+    "@saas/prettier": "workspace:*",
     "eslint-plugin-simple-import-sort": "^12.1.1"
   },
   "prettier": "@saas/prettier",
   "eslintConfig": {
-    "extends": ["./base.js"]
+    "extends": [
+      "./base.js"
+    ]
   }
 }
