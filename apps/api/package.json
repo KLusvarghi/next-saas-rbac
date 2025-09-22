@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",
+    "@fastify/swagger": "^9.5.1",
+    "@fastify/swagger-ui": "^5.2.3",
     "@prisma/client": "6.16.2",
     "@saas/auth": "workspace:*",
     "bcryptjs": "^3.0.2",
@@ -20,6 +22,7 @@
     "zod": "^4.1.9"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.0.0",
     "@saas/eslint-config": "workspace:*",
     "@saas/prettier": "workspace:*",
     "@saas/tsconfig": "workspace:*",
@@ -27,6 +30,9 @@
     "@types/node": "^24.5.1",
     "prisma": "^6.16.2",
     "tsx": "^4.20.5"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "prettier": "@saas/prettier",
   "eslintConfig": {
