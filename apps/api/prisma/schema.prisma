@@ -109,7 +109,7 @@ model Invite {
 // essa é uma tabela pivo N:N entre User e Organization
 model Member {
   id   String @id @default(uuid())
-  role Role
+  role Role @default(MEMBER)
 
   // Essa é a relação de um membro para uma organização
   // isso porque um user pode fazer parte de várias organizações
